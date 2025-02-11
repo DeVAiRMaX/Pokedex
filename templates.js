@@ -1,3 +1,10 @@
+
+/**
+ * Returns a HTML string representing a pokemon card.
+ * The card includes the name, the first two types and an image of the pokemon.
+ * @param {Object} pokemon A pokemon object from the PokeAPI.
+ * @returns {String} A HTML string representing the pokemon card.
+ */
 function createPokemonCard(pokemon) {
     let name = pokemon['name'];
     let formattedName = name.charAt(0).toUpperCase() + name.slice(1);
@@ -20,6 +27,13 @@ function createPokemonCard(pokemon) {
 
 
 
+/**
+ * Returns a HTML string representing a pokemon popup.
+ * The popup includes the name, the first two types, an image of the pokemon, a navigation to the previous and next pokemon
+ * and a table with the weight and height of the pokemon.
+ * @param {Object} pokemon A pokemon object from the PokeAPI.
+ * @returns {String} A HTML string representing the pokemon popup.
+ */
 function createPokemonPopup(pokemon) {
     let name = pokemon['name'];
     let formattedName = name.charAt(0).toUpperCase() + name.slice(1);
@@ -31,7 +45,6 @@ function createPokemonPopup(pokemon) {
         typeIcons += `<img class="types" src="img/${pokemon['types'][1]['type']['name']}.png" alt="${pokemon['types'][1]['type']['name']}">`;
     }
 
-    // Calculate the previous and next ID
     let previousId = pokemon['id'] - 1;
     let nextId = pokemon['id'] + 1;
 
@@ -61,19 +74,34 @@ function createPokemonPopup(pokemon) {
 }
 
 
+/**
+ * Shows the popup of the pokemon with the given id if it is greater than 0.
+ * @param {number} id The id of the pokemon to show the popup for.
+ */
 function back(id) {
     if (id > 0) {
         showPopup(id);
     }
 }
 
+/**
+ * Shows the popup of the pokemon with the given id if it is less than or equal
+ * to the number of Pokémon in the current generation.
+ * @param {number} id The id of the pokemon to show the popup for.
+ */
 function forward(id) {
-    // Assuming we have 1302 Pokémon in the current generation
     if (id <= 1302) {
         showPopup(id);
     }
 }
 
+
+/**
+ * Returns a HTML string containing a canvas element for displaying a chart.
+ * The canvas is styled to be displayed as a block element with a specific height
+ * and width, and is intended to be used with Chart.js for rendering.
+ * @returns {String} A HTML string with a canvas element.
+ */
 
 function getChartTemplate() {
     return `
@@ -81,15 +109,35 @@ function getChartTemplate() {
     `;
 }
 
+/**
+ * Returns a HTML string containing an image element for a pokemon evolution.
+ * The image is fetched from a URL using the given pokemon ID.
+ * @param {number} id The ID of the pokemon for which the evolution image is to be displayed.
+ * @returns {String} A HTML string with an image element for the evolution.
+ */
+
 function getEvolutionImageTemplate(id) {
     return `
     <img class="evolutionImage" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/${id}.png" alt="">
     `;
 }
 
+/**
+ * Returns a HTML string containing a span element that displays a right-pointing
+ * arrow, intended to be used to indicate a pokemon evolution.
+ * @returns {String} A HTML string with a span element for the evolution arrow.
+ */
 function getEvolutionArrowTemplate() {
     return `<div class="evolutionArrow">&#10148;</div>`;
 }
+
+/**
+ * Returns a HTML string containing a table element for displaying information
+ * about a pokemon, specifically the weight and height of the pokemon.
+ * @param {number} weight The weight of the pokemon in kilograms.
+ * @param {number} height The height of the pokemon in meters.
+ * @returns {String} A HTML string with a table element for the pokemon information.
+ */
 
 function getInfoTableTemplate(weight, height) {
     return /*html*/`

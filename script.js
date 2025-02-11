@@ -1,19 +1,28 @@
 let showNumberPokemons = 20;
 let pokemons = [];
 
+/**
+ * Loads the first 20 pokemons and renders them as cards in the content 
+ * container. Also hides the popup if it is currently visible.
+ */
 function render() {
     loadPokemons();
     hidePopup();
 }
 
+/**
+ * Loads the first {showNumberPokemons} pokemons from the PokeAPI and renders
+ * them as cards in the content container. Also shows the loading screen until
+ * all pokemons are loaded.
+ */
 async function loadPokemons() {
-    // Display the loading screen
     document.getElementById('loadingScreen').style.display = 'block';
+
 
     const BASE_URL = `https://pokeapi.co/api/v2/pokemon?limit=${showNumberPokemons}&offset=0`;
     const response = await fetch(BASE_URL);
     const data = await response.json();
-
+    
     for (const { url } of data.results) {
         const response = await fetch(url);
         const pokemon = await response.json();
@@ -22,10 +31,12 @@ async function loadPokemons() {
 
     renderPokemons();
 
-    // Hide the loading screen when the data is loaded
     document.getElementById('loadingScreen').style.display = 'none';
 }
 
+/**
+ * Renders all pokemons in the content container.
+ */
 function renderPokemons() {
     const contentContainer = document.getElementById('content');
     contentContainer.innerHTML = '';
@@ -34,6 +45,10 @@ function renderPokemons() {
     });
 }
 
+/**
+ * Renders the pokemons in the content container starting from the given index.
+ * @param {number} startIndex The index from which the pokemons should be rendered.
+ */
 function renderNewPokemons(startIndex) {
     const contentContainer = document.getElementById('content');
     for (let i = startIndex; i < pokemons.length; i++) {
@@ -41,14 +56,17 @@ function renderNewPokemons(startIndex) {
     }
 }
 
+/**
+ * Loads the next set of 10 pokemons from the PokeAPI and appends them to the
+ * existing list of pokemons. Updates the content container to display the new
+ * pokemons, and shows the loading screen while the data is being fetched.
+ */
 async function loadMore() {
-    // Display the loading screen
+
     document.getElementById('loadingScreen').style.display = 'block';
 
-    // Determine the current index to render only the new Pokémon later
     const currentLength = pokemons.length;
 
-    // Load 10 more Pokémon
     const BASE_URL = `https://pokeapi.co/api/v2/pokemon?limit=10&offset=${currentLength}`;
     const response = await fetch(BASE_URL);
     const data = await response.json();
@@ -59,15 +77,19 @@ async function loadMore() {
         pokemons.push(pokemon);
     }
 
-    // Render only the newly added Pokémon
     renderNewPokemons(currentLength);
 
     console.log(showNumberPokemons);
 
-    // Hide the loading screen when the data is loaded
     document.getElementById('loadingScreen').style.display = 'none';
 }
 
+/**
+ * Shows the popup with the detailed information of the pokemon with the given id.
+ * The information is fetched from the PokeAPI and the popup is populated with
+ * the received data.
+ * @param {number} i The id of the pokemon to show the information for.
+ */
 async function showPopup(i) {
     let popup = document.getElementById('popup');
     popup.classList.remove('d-none');
@@ -78,16 +100,29 @@ async function showPopup(i) {
     infoCardContainer.innerHTML = createPokemonPopup(pokemon);
 }
 
+/**
+ * Hides the popup by adding the 'd-none' class to the popup element.
+ */
 function hidePopup() {
     let popup = document.getElementById('popup');
     popup.classList.add('d-none');
 }
 
+/**
+ * Hides the popup by adding the 'd-none' class to the popup element.
+ * This can be used to close the popup when the user clicks outside the
+ * popup or presses the escape key.
+ */
 function closePopup() {
     let popup = document.getElementById('popup');
     popup.classList.add('d-none');
 }
 
+/**
+ * Shows a bar chart of the given pokemon's stats in the info card.
+ * The chart shows the HP, Attack and Defense stats of the pokemon.
+ * @param {number} pokemon The id of the pokemon to show the stats for.
+ */
 async function showStats(pokemon) {
     const infoCardContent = document.getElementById('infoCardContent');
     infoCardContent.innerHTML = getChartTemplate();
@@ -126,27 +161,27 @@ async function showStats(pokemon) {
             scales: {
                 x: {
                     beginAtZero: true,
-                    max: 200, // Assuming the maximum stat value is 255
+                    max: 200,
                     ticks: {
-                        color: '#2591c7' // X-axis tick labels color
+                        color: '#2591c7'
                     },
                     grid: {
-                        color: '#494949' // X-axis grid lines color
+                        color: '#494949'
                     }
                 },
                 y: {
                     ticks: {
-                        color: '#2591c7' // Y-axis tick labels color
+                        color: '#2591c7'
                     },
                     grid: {
-                        color: '#494949' // Y-axis grid lines color
+                        color: '#494949' 
                     }
                 }
             },
             plugins: {
                 legend: {
                     labels: {
-                        color: '#2591c7' // Legend labels color
+                        color: '#2591c7' 
                     }
                 }
             }
@@ -154,33 +189,35 @@ async function showStats(pokemon) {
     });
 }
 
+/**
+ * Shows the first three evolutions of the given pokemon in the info card.
+ * The evolutions are fetched from the PokeAPI and the popup is populated
+ * with the received data.
+ * @param {number} pokemonId The id of the pokemon to show the evolutions for.
+ */
 async function showEvolution(pokemonId) {
     const infoCardContent = document.getElementById('infoCardContent');
     infoCardContent.innerHTML = '';
 
-    // Get the species information to find the evolution chain URL
     const speciesUrl = `https://pokeapi.co/api/v2/pokemon-species/${pokemonId}`;
     const speciesResponse = await fetch(speciesUrl);
     const speciesData = await speciesResponse.json();
     const evolutionChainUrl = speciesData.evolution_chain.url;
 
-    // Fetch the evolution chain data
     const responseEvolution = await fetch(evolutionChainUrl);
     const evolutionData = await responseEvolution.json();
 
-    // Function to get the Pokémon ID from the URL
     function getIdFromUrl(url) {
         const parts = url.split('/');
         return parts[parts.length - 2];
     }
-
-    // Recursive function to get up to three evolutions with arrows
+    
     function getEvolutions(chain, count = 0) {
         const evolutions = [];
         const id = getIdFromUrl(chain.species.url);
         evolutions.push(getEvolutionImageTemplate(id));
 
-        if (count < 2 && chain.evolves_to.length > 0) { // Stop after the third evolution
+        if (count < 2 && chain.evolves_to.length > 0) {
             evolutions.push(getEvolutionArrowTemplate());
             chain.evolves_to.forEach(evolution => {
                 evolutions.push(...getEvolutions(evolution, count + 1));
@@ -190,12 +227,18 @@ async function showEvolution(pokemonId) {
         return evolutions;
     }
 
-    // Get up to three evolutions
     const firstThreeEvolutions = getEvolutions(evolutionData.chain).slice(0, 5).join('');
     infoCardContent.innerHTML = firstThreeEvolutions;
 }
 
 
+
+/**
+ * Shows the info of the pokemon with the given id.
+ * The information is fetched from the PokeAPI and the popup is populated with
+ * the received data.
+ * @param {number} pokemonid The id of the pokemon to show the information for.
+ */
 
 async function showPokemonInfo(pokemonid) {
     const url = `https://pokeapi.co/api/v2/pokemon/${pokemonid}`;
@@ -208,8 +251,15 @@ async function showPokemonInfo(pokemonid) {
     infoCardContent.innerHTML = getInfoTableTemplate(weight, height);
 }
 
+/**
+ * Filters the list of pokemons based on the user's search input and displays
+ * the matching pokemons as cards in the content container.
+ * The search is case-insensitive and matches any occurrence of the input
+ * string within a pokemon's name.
+ */
+
 async function filterNames() {
-    const url = `https://pokeapi.co/api/v2/pokemon?limit=${showNumberPokemons}`; // Limit set to 1000 to fetch all Pokémon names
+    const url = `https://pokeapi.co/api/v2/pokemon?limit=${showNumberPokemons}`;
     const response = await fetch(url);
     const data = await response.json();
 
@@ -219,13 +269,13 @@ async function filterNames() {
     let contentContainer = document.getElementById('content');
     contentContainer.innerHTML = '';
 
-    // Get the list of Pokémon names
+
     let pokemons = data.results;
 
     for (let i = 0; i < pokemons.length; i++) {
         let pokemonName = pokemons[i].name;
         if (pokemonName.toLowerCase().includes(search)) {
-            // Fetch detailed Pokémon data to create a Pokémon card
+
             let pokemonDetailResponse = await fetch(pokemons[i].url);
             let pokemon = await pokemonDetailResponse.json();
             contentContainer.innerHTML += createPokemonCard(pokemon);
